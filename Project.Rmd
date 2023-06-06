@@ -1,5 +1,5 @@
 ---
-title: "Final project by Ian Musumba"
+title: "Project by Ian Musumba"
 output:
   pdf_document: default
   html_document: default
