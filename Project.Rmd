@@ -1,0 +1,128 @@
+---
+title: "Final project by Ian Musumba"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+date: "2022-10-29"
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r include=FALSE}
+library(readr)
+library(mosaic)
+library(ggformula) 
+library(Stat2Data)
+library(tidyverse)
+library(gridExtra)
+library(car)
+library(lares)
+library(fastDummies)
+library(jtools)
+
+life <- read.csv("~/Desktop/Finale/Life Expectancy Data.csv")
+```
+
+#Quick view of the datset
+```{r}
+glimpse(life)
+```
+
+# Checking for null values
+```{r}
+table(is.na(life))
+```
+
+# Handling missing values by replacing them with median value
+```{r}
+life$Life.expectancy[is.na(life$Life.expectancy)] <- median(life$Life.expectancy, na.rm = T)
+life$Schooling[is.na(life$Schooling)] <- median(life$Schooling, na.rm = T)
+life$infant.deaths[is.na(life$infant.deaths)] <- median(life$infant.deaths, na.rm = T)
+life$Hepatitis.B[is.na(life$Hepatitis.B)] <- median(life$Hepatitis.B, na.rm = T)
+life$BMI[is.na(life$BMI)] <- median(life$BMI, na.rm = T)
+life$GDP[is.na(life$GDP)] <- median(life$GDP, na.rm = T)
+life$Population[is.na(life$Population)] <- median(life$Population, na.rm = T)
+life$Income.composition.of.resources[is.na(life$Income.composition.of.resources)] <-   median(life$Income.composition.of.resources, na.rm = T)
+```
+
+```{r}
+cor(life[,c(4,  6, 9, 11, 16:18, 21:22)], use = "complete.obs")
+```
+
+
+#EDA
+
+
+#Summary statistics 
+```{r}
+favstats(~Life.expectancy, data = life) 
+```
+```{r}
+favstats(~BMI, data = life) 
+```
+
+```{r}
+favstats(~GDP, data = life) 
+```
+
+#Histogram of Life Expectancy
+```{r}
+ggplot(life, aes(x=Life.expectancy)) + geom_density(col="blue") + geom_histogram(aes(y=..density..), colour="black", fill=NA) + ggtitle("Figure 1: Distribution of Life Expectancy") + xlab("Life Expectancy in Years") + ylab("Density")
+```
+
+#Scatter plot of Years vs. Life expectancy
+```{r}
+ggplot(life, aes(x=Year, y=Life.expectancy)) + geom_point() + ggtitle("Figure 2: Year vs Life Expectancy") +
+  xlab("Year") + ylab("Life Expectancy")
+```
+
+#One categorical variable barchart
+```{r}
+ggplot(life, aes(x=Status, fill=Status)) + geom_bar(position="dodge") + ggtitle("Figure 3: Bar chart of Status")
+```
+
+
+#Checking whether Status has an effect on Life expactancy
+```{r}
+ggplot(life, aes(x=Life.expectancy, col=Status)) + geom_density() + ggtitle("Figure 4: Overlaid Density Plots of Life Expectancy by Status") + xlab("Life Expectancy")
+```
+
+#fitting models
+
+Model 1:
+```{r fig.height=8,fig.width=8}
+MODEL1 <- lm(Life.expectancy ~ Year+ Status+ Adult.Mortality+ Hepatitis.B+ BMI+ GDP+ Population+ Income.composition.of.resources + HIV.AIDS + Schooling, data=life, na.action = na.omit)
+summary(MODEL1)
+
+plot(MODEL1)
+gf_histogram(~MODEL1$residuals)
+mean(MODEL1$residual^2)
+```
+
+Final Model:
+
+```{r fig.height=8,fig.width=8}
+MODEL2 <- lm(Life.expectancy ~ Status+ Adult.Mortality+ Hepatitis.B+ BMI+ GDP+ Income.composition.of.resources + HIV.AIDS + Schooling, data=life, na.action = na.omit)
+summary(MODEL2)
+
+plot(MODEL2)
+gf_histogram(~MODEL2$residuals)
+mean(MODEL2$residual^2)
+```
+
+```{r}
+summ(MODEL2, confint = TRUE, digits = 3)
+```
+
+
+
+
+
+
+
+
+
+
+
+
